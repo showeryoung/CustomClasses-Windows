@@ -154,7 +154,7 @@ __done:
     return dst;
 }
 
-void* unaligned_memcpy_sse2(void* dst, const void* src, size_t num)
+void* unaligned_memcpy_sse(void* dst, const void* src, size_t num)
 {
     __asm {
         push edi;
@@ -197,25 +197,23 @@ __already_aligned:
         shr ecx, 7;
 
 __copy_128b:
-        ; movdqa--->movapd
-        movapd xmm0, [esi    ];
-        movapd xmm1, [esi+16 ];
-        movapd xmm2, [esi+32 ];
-        movapd xmm3, [esi+48 ];
-        movapd xmm4, [esi+64 ];
-        movapd xmm5, [esi+80 ];
-        movapd xmm6, [esi+96 ];
-        movapd xmm7, [esi+112];
+        movaps xmm0, [esi    ];
+        movaps xmm1, [esi+16 ];
+        movaps xmm2, [esi+32 ];
+        movaps xmm3, [esi+48 ];
+        movaps xmm4, [esi+64 ];
+        movaps xmm5, [esi+80 ];
+        movaps xmm6, [esi+96 ];
+        movaps xmm7, [esi+112];
 
-        ; movntdq--->movntpd
-        movntpd [edi    ], xmm0;
-        movntpd [edi+16 ], xmm1;
-        movntpd [edi+32 ], xmm2;
-        movntpd [edi+48 ], xmm3;
-        movntpd [edi+64 ], xmm4;
-        movntpd [edi+80 ], xmm5;
-        movntpd [edi+96 ], xmm6;
-        movntpd [edi+112], xmm7;
+        movntps [edi    ], xmm0;
+        movntps [edi+16 ], xmm1;
+        movntps [edi+32 ], xmm2;
+        movntps [edi+48 ], xmm3;
+        movntps [edi+64 ], xmm4;
+        movntps [edi+80 ], xmm5;
+        movntps [edi+96 ], xmm6;
+        movntps [edi+112], xmm7;
 
         add esi, 128;
         add edi, 128;
