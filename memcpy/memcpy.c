@@ -154,6 +154,7 @@ __done:
     return dst;
 }
 
+
 void* unaligned_memcpy_sse(void* dst, const void* src, size_t num)
 {
     __asm {
@@ -197,6 +198,7 @@ __already_aligned:
         shr ecx, 7;
 
 __copy_128b:
+        prefetchnta  [esi+512];
         movaps xmm0, [esi    ];
         movaps xmm1, [esi+16 ];
         movaps xmm2, [esi+32 ];
@@ -214,6 +216,89 @@ __copy_128b:
         movntps [edi+80 ], xmm5;
         movntps [edi+96 ], xmm6;
         movntps [edi+112], xmm7;
+
+        add esi, 128;
+        add edi, 128;
+
+        loop __copy_128b;
+
+__tail_bytes:
+        test edx, edx;
+        jz __done;
+        mov ecx, edx;
+        rep movsb;
+
+__done:
+        pop edx;
+        pop ecx;
+        pop ebx;
+        pop esi;
+        pop edi;
+    }
+
+    return dst;
+}
+
+void* unaligned_memcpy_sse2(void* dst, const void* src, size_t num)
+{
+    __asm {
+        push edi;
+        push esi;
+        push ebx;
+        push ecx;
+        push edx;
+
+        ; Handle unaligned bytes if dst address is not aligned
+            mov edx, dst;
+        mov ecx, 0x00000000;
+        and edx, ALIGNED_MASK_128;
+        test edx, edx;
+        jz __already_aligned;
+
+        ; Copy unaligned bytes
+            mov edi, dst;
+        mov esi, src;
+        mov ecx, edx;
+        rep movsb;
+        sub num, ecx;
+
+__already_aligned:
+        mov edi, dst;
+        mov esi, src;
+        add edi, ecx;
+        add esi, ecx;
+        mov ebx, num;
+        mov edx, num;
+
+        and edx, 0x0000007f;
+        and ebx, 0xffffff80;
+
+        ; Use movsb if less than 128 bytes
+            test ebx, ebx;
+        jz __tail_bytes;
+
+        ; Setup loop counter
+            mov ecx, ebx;
+        shr ecx, 7;
+
+__copy_128b:
+        movdqa xmm0, [esi    ];
+        movdqa xmm1, [esi+16 ];
+        movdqa xmm2, [esi+32 ];
+        movdqa xmm3, [esi+48 ];
+        movdqa xmm4, [esi+64 ];
+        movdqa xmm5, [esi+80 ];
+        movdqa xmm6, [esi+96 ];
+        movdqa xmm7, [esi+112];
+
+        movntdq [edi    ], xmm0;
+        movntdq [edi+16 ], xmm1;
+        movntdq [edi+32 ], xmm2;
+        movntdq [edi+48 ], xmm3;
+        movntdq [edi+64 ], xmm4;
+        movntdq [edi+80 ], xmm5;
+        movntdq [edi+96 ], xmm6;
+        movntdq [edi+112], xmm7;
 
         add esi, 128;
         add edi, 128;

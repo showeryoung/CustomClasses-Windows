@@ -15,9 +15,13 @@ void* aligned_memcpy_mmx(void* dst, const void* src, size_t num);
 /// @note dst & src must be aligned to native integer
 void* aligned_memcpy_sse2(void* dst, const void* src, size_t num);
 
-/// @brief SSE2 enhanced memory copy with address unaligned
+/// @brief SSE enhanced memory copy with address unaligned
 /// @note dst & src doesn't need to be aligned to native integer
 void* unaligned_memcpy_sse(void* dst, const void* src, size_t num);
+
+/// @brief SSE2 enhanced memory copy with address unaligned
+/// @note dst & src doesn't need to be aligned to native integer
+void* unaligned_memcpy_sse2(void* dst, const void* src, size_t num);
 
 /// @brief AVX enhanced memory copy with address unaligned
 /// @note dst & src doesn't need to be aligned to native integer
