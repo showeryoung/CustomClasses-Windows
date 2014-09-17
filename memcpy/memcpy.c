@@ -174,7 +174,9 @@ void* unaligned_memcpy_sse(void* dst, const void* src, size_t num)
         ; Copy unaligned bytes
         mov edi, dst;
         mov esi, src;
-        mov ecx, edx;
+        ; mov ecx, edx;
+        mov ecx, ALIGNED_MASK_128;
+        sub ecx, edx;
         rep movsb;
         sub num, ecx;
 
@@ -256,9 +258,11 @@ void* unaligned_memcpy_sse2(void* dst, const void* src, size_t num)
         jz __already_aligned;
 
         ; Copy unaligned bytes
-            mov edi, dst;
+        mov edi, dst;
         mov esi, src;
-        mov ecx, edx;
+        ; mov ecx, edx;
+        mov ecx, ALIGNED_MASK_128;
+        sub ecx, edx;
         rep movsb;
         sub num, ecx;
 
@@ -274,11 +278,11 @@ __already_aligned:
         and ebx, 0xffffff80;
 
         ; Use movsb if less than 128 bytes
-            test ebx, ebx;
+        test ebx, ebx;
         jz __tail_bytes;
 
         ; Setup loop counter
-            mov ecx, ebx;
+        mov ecx, ebx;
         shr ecx, 7;
 
 __copy_128b:
@@ -342,7 +346,9 @@ void *unaligned_memcpy_avx(void* dst, const void* src, size_t num)
         ; Copy unaligned bytes
         mov edi, dst;
         mov esi, src;
-        mov ecx, edx;
+        ; mov ecx, edx;
+        mov ecx, ALIGNED_MASK_256;
+        sub ecx, edx;
         rep movsb;
         sub num, ecx;
 
